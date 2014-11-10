@@ -11,8 +11,22 @@ Add the required-table-values folder to your root directory. Create your one jso
 Version 1.0 Usage
 =================
 
-The File
---------
+Running The Code
+----------------
+The code for this project is easy to run, simply `include` the file in your project and then create a new object of it passing in your database settings in a key value array matching the one below.
+```php
+require('required-table-values/Run.php');
+$settings = array(
+    'database_host' => 'localhost',
+    'username' => 'root',
+    'password' => '',
+    'database' => 'example'
+);
+new Run($settings);
+```
+
+The Files
+---------
 Inside of the `required-table-values` folder, create one json file for each of your tables. The naming convention is simple, `table_name.json`.
 
 Rows
@@ -61,3 +75,25 @@ Example
     }
 }
 ```
+
+Support
+=======
+I will respond to any problems as quickly as possible, but here are some potential issues:
+Uses mysqli not PDO so no need to update older systems.
+Uses OOPHP so if your PHP version is below 5, you will need to upgrade.
+Only currently supports MySQL.
+
+Upcoming Versions
+=================
+
+Version 1.1
+-----------
+Version 1.1 will support mongoDB, this will be the only change.
+
+Version 1.2
+-----------
+Version 1.2 will have a number of new settings such as `truncate` and `create_table`, these will hopefully make database management smoother. Version 1.2 will also make replacements smarter instead of deleting all related data based on loose string.
+
+Version 2.0
+-----------
+Version 2.0 will be a complete rework of the code so that it isn't all stored in the class constructor and so that it is much easier on the eye.
