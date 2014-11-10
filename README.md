@@ -52,7 +52,7 @@ Example
             "name": "Estimated Next Update",
             "value": "17/11/2014",
             "replace": {
-                "name": Estimated Next Update",
+                "name": "Estimated Next Update",
                 "value": NULL
             }
     ],

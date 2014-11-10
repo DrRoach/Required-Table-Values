@@ -56,11 +56,18 @@ class Run {
             foreach($settings as $setting => $value) {
                 if(strtolower($setting) == 'overwrite' && $value === true) {
                     foreach($json['rows'] as $row) {
+                        //Remove any array rows
                         $sql = 'DELETE FROM '.$table.' WHERE ';
                         $count = 0;
                         if(isset($row['replace']) && is_array($row['replace'])) {
                             $replace = $row['replace'];
                         } else {
+                            //Remove any array rows
+                            foreach($row as $index => $check) {
+                                if(is_array($check)) {
+                                    unset($row[$index]);
+                                }
+                            }
                             $replace = $row;
                         }
                         foreach($replace as $key => $val) {
