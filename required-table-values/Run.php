@@ -14,6 +14,11 @@ class Run {
             exit;
         }
 
+        //Check to see if port is set, if not set it to 3306
+        if(!isset($data['port'])) {
+            $data['port'] = '3306';
+        }
+
         //Make sure all relevant values are set in data
         if(!isset($data['database_host']) || !isset($data['username']) || !isset($data['password']) || !isset($data['database'])) {
             echo 'Please make sure you pass through your data with the correct array keys';
@@ -47,10 +52,12 @@ class Run {
             //Get the table from filename
             $table = substr($dir, 0, strlen($dir) - 5);
             $contents = file_get_contents(__DIR__ . '/' . $dir);
-            $json = json_decode($contents, 1);
+            $json = json_decode($contents, true);
             //Get the settings
             if(!empty($json['settings'])) {
                 $settings = $json['settings'];
+            } else {
+                $settings = array();
             }
             //Run through settings
             foreach($settings as $setting => $value) {
@@ -76,7 +83,13 @@ class Run {
                             $count++;
                         }
                         //Delete row
-                        $con->query($sql);
+                        //Prepare statement
+                        if($query = $con->prepare($sql)) {
+                            $query->execute();
+                        } else {
+                            echo 'There was a problem when deleting the row';
+                            exit;
+                        }
                     }
                 }
             }
@@ -100,16 +113,22 @@ class Run {
                     $count++;
                 }
                 //Insert built row
-                $con->query($sql . $end_sql);
+                //Prepare the sql
+                if($query = $con->prepare($sql . $end_sql)) {
+                    $query->execute();
+                } else {
+                    echo 'There was a error when inserting your row';
+                    exit;
+                }
             }
         }
-        $con->close();
+        $con->close($con);
         echo 'Finished';
         exit;
     }
 
     public static function connect($data) {
-        return new mysqli($data['database_host'], $data['username'], $data['password'], $data['database']);
+        return new mysqli($data['database_host'], $data['username'], $data['password'], $data['database'], $data['port']);
     }
 }
 
