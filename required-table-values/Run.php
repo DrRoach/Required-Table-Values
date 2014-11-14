@@ -84,7 +84,7 @@ class Run {
                         }
                         //Delete row
                         //Prepare statement
-                        if($query = $con->prepare($sql)) {
+                        if($query = $con->prepare($con, $sql)) {
                             $query->execute();
                         } else {
                             echo 'There was a problem when deleting the row';
@@ -114,7 +114,7 @@ class Run {
                 }
                 //Insert built row
                 //Prepare the sql
-                if($query = $con->prepare($sql . $end_sql)) {
+                if($query = $con->prepare($con, $sql . $end_sql)) {
                     $query->execute();
                 } else {
                     echo 'There was a error when inserting your row';
