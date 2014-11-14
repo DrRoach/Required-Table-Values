@@ -38,14 +38,8 @@ class Run {
             exit;
         }
 
-        //Get contents of directory
-        $dirs = scandir(__DIR__);
-        //Filter out any none json files
-        foreach($dirs as $index => $dir) {
-            if(strtolower(substr($dir, -5)) != '.json') {
-                unset($dirs[$index]);
-            }
-        }
+        //Get directories
+        $dirs = $this->get_dirs();
 
         //Loop through all json files and insert relevant data
         foreach($dirs as $dir) {
@@ -60,61 +54,15 @@ class Run {
                 $settings = array();
             }
             //Run through settings
-            foreach($settings as $setting => $value) {
-                if(strtolower($setting) == 'overwrite' && $value === true) {
-                    foreach($json['rows'] as $row) {
-                        //Remove any array rows
-                        $sql = 'DELETE FROM '.$table.' WHERE ';
-                        $count = 0;
-                        if(isset($row['replace']) && is_array($row['replace'])) {
-                            $replace = $row['replace'];
-                        } else {
-                            //Remove any array rows
-                            foreach($row as $index => $check) {
-                                if(is_array($check)) {
-                                    unset($row[$index]);
-                                }
-                            }
-                            $replace = $row;
-                        }
-                        foreach($replace as $key => $val) {
-                            $sql .= '`'.$key.'` = \''.$val.'\'';
-                            ($count == count($replace) - 1 ? $sql .= ';' : $sql .= ' AND ');
-                            $count++;
-                        }
-                        //Delete row
-                        //Prepare statement
-                        if($query = $con->prepare($con, $sql)) {
-                            $query->execute();
-                        } else {
-                            echo 'There was a problem when deleting the row';
-                            exit;
-                        }
-                    }
-                }
-            }
+            $this->settings($settings, $json, $table, $con);
             //Insert each row
             foreach($json['rows'] as $row) {
                 //Remove any array rows
-                foreach($row as $index => $check) {
-                    if(is_array($check)) {
-                        unset($row[$index]);
-                    }
-                }
-                $sql = 'INSERT INTO '.$table.' (';
-                $end_sql = 'VALUES (';
-                //Loop through ind columns and build query
-                $count = 0;
-                foreach($row as $col => $val) {
-                    $sql .= $col;
-                    $end_sql .= '\''.$val.'\'';
-                    ($count == count($row) - 1 ? $sql .= ') ' : $sql .= ', ');
-                    ($count == count($row) - 1 ? $end_sql .= ');' : $end_sql .= ', ');
-                    $count++;
-                }
+                $row = $this->remove_array_rows($row);
+                $sql = $this->build_insert_sql($row, $table);
                 //Insert built row
                 //Prepare the sql
-                if($query = $con->prepare($con, $sql . $end_sql)) {
+                if($query = $con->prepare($sql)) {
                     $query->execute();
                 } else {
                     echo 'There was a error when inserting your row';
@@ -133,6 +81,99 @@ class Run {
             $socket = null;
         }
         return new mysqli($data['database_host'], $data['username'], $data['password'], $data['database'], $data['port'], $socket);
+    }
+
+    /**
+     * @return array
+     */
+    public function get_dirs() {
+        //Get contents of directory
+        $dirs = scandir(__DIR__);
+        //Filter out any none json files
+        foreach ($dirs as $index => $dir) {
+            if (strtolower(substr($dir, -5)) != '.json') {
+                unset($dirs[$index]);
+            }
+        }
+        return $dirs;
+    }
+
+    /**
+     * @param $settings
+     * @param $json
+     * @param $table
+     * @param $con
+     *
+     * @return boolean
+     */
+    public function settings($settings, $json, $table, $con) {
+        foreach ($settings as $setting => $value) {
+            if (strtolower($setting) == 'overwrite' && $value === true) {
+                foreach ($json['rows'] as $row) {
+                    //Remove any array rows
+                    $sql = 'DELETE FROM ' . $table . ' WHERE ';
+                    $count = 0;
+                    if (isset($row['replace']) && is_array($row['replace'])) {
+                        $replace = $row['replace'];
+                    } else {
+                        //Remove any array rows
+                        foreach ($row as $index => $check) {
+                            if (is_array($check)) {
+                                unset($row[$index]);
+                            }
+                        }
+                        $replace = $row;
+                    }
+                    foreach ($replace as $key => $val) {
+                        $sql .= '`' . $key . '` = \'' . $val . '\'';
+                        ($count == count($replace) - 1 ? $sql .= ';' : $sql .= ' AND ');
+                        $count++;
+                    }
+                    //Delete row
+                    //Prepare statement
+                    if ($query = $con->prepare($sql)) {
+                        $query->execute();
+                    } else {
+                        echo 'There was a problem when deleting the row';
+                        exit;
+                    }
+                }
+            }
+        }
+        return true;
+    }
+
+    /**
+     * @param $row
+     */
+    public function remove_array_rows($row) {
+        foreach ($row as $index => $check) {
+            if (is_array($check)) {
+                unset($row[$index]);
+            }
+        }
+        return $row;
+    }
+
+    /**
+     * @param $row
+     * @param $table
+     *
+     * @return array
+     */
+    public function build_insert_sql($row, $table) {
+        $sql = 'INSERT INTO ' . $table . ' (';
+        $end_sql = 'VALUES (';
+        //Loop through ind columns and build query
+        $count = 0;
+        foreach ($row as $col => $val) {
+            $sql .= $col;
+            $end_sql .= '\'' . $val . '\'';
+            ($count == count($row) - 1 ? $sql .= ') ' : $sql .= ', ');
+            ($count == count($row) - 1 ? $end_sql .= ');' : $end_sql .= ', ');
+            $count++;
+        }
+        return $sql . $end_sql;
     }
 }
 
