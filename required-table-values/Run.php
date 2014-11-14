@@ -2,6 +2,11 @@
 
 class Run {
     public function __construct($data) {
+        error_reporting(E_ALL);
+        ini_set('display_errors', 1);
+        //Pull in SqlBuilder class
+        require_once('SqlBuilder.php');
+
         //Make sure data has been passed
         if(empty($data)) {
             echo 'Please pass your database connection settings in a key value array';
@@ -59,7 +64,7 @@ class Run {
             foreach($json['rows'] as $row) {
                 //Remove any array rows
                 $row = $this->remove_array_rows($row);
-                $sql = $this->build_insert_sql($row, $table);
+                $sql = SqlBuilder::build_insert_sql($row, $table);
                 //Insert built row
                 //Prepare the sql
                 if($query = $con->prepare($sql)) {
@@ -70,7 +75,7 @@ class Run {
                 }
             }
         }
-        $con->close($con);
+        $con->close();
         echo 'Finished';
         exit;
     }
@@ -111,14 +116,13 @@ class Run {
             if (strtolower($setting) == 'overwrite' && $value === true) {
                 foreach ($json['rows'] as $row) {
                     //Remove any array rows
-                    $count = 0;
                     if (isset($row['replace']) && is_array($row['replace'])) {
                         $replace = $row['replace'];
                     } else {
                         //Remove any array rows
                         $replace = $this->remove_array_rows($row);
                     }
-                    $sql = $this->build_delete_sql($table, $replace, $count);
+                    $sql = SqlBuilder::build_delete_sql($table, $replace);
                     //Delete row
                     //Prepare statement
                     if ($query = $con->prepare($sql)) {
@@ -143,44 +147,6 @@ class Run {
             }
         }
         return $row;
-    }
-
-    /**
-     * @param $row
-     * @param string $table
-     *
-     * @return string
-     */
-    public function build_insert_sql($row, $table) {
-        $sql = 'INSERT INTO ' . $table . ' (';
-        $end_sql = 'VALUES (';
-        //Loop through ind columns and build query
-        $count = 0;
-        foreach ($row as $col => $val) {
-            $sql .= $col;
-            $end_sql .= '\'' . $val . '\'';
-            ($count == count($row) - 1 ? $sql .= ') ' : $sql .= ', ');
-            ($count == count($row) - 1 ? $end_sql .= ');' : $end_sql .= ', ');
-            $count++;
-        }
-        return $sql . $end_sql;
-    }
-
-    /**
-     * @param string $table
-     * @param $replace
-     * @param $count
-     *
-     * @return string
-     */
-    public function build_delete_sql($table, $replace, $count) {
-        $sql = 'DELETE FROM ' . $table . ' WHERE ';
-        foreach ($replace as $key => $val) {
-            $sql .= '`' . $key . '` = \'' . $val . '\'';
-            ($count == count($replace) - 1 ? $sql .= ';' : $sql .= ' AND ');
-            $count++;
-        }
-        return $sql;
     }
 }
 
