@@ -128,7 +128,7 @@ class Run {
     }
 
     public static function connect($data) {
-        return new mysqli($data['database_host'], $data['username'], $data['password'], $data['database'], $data['port']);
+        return new mysqli($data['database_host'], $data['username'], $data['password'], $data['database'], $data['port'], null);
     }
 }
 
