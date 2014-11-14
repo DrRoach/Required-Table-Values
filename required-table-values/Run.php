@@ -111,24 +111,14 @@ class Run {
             if (strtolower($setting) == 'overwrite' && $value === true) {
                 foreach ($json['rows'] as $row) {
                     //Remove any array rows
-                    $sql = 'DELETE FROM ' . $table . ' WHERE ';
                     $count = 0;
                     if (isset($row['replace']) && is_array($row['replace'])) {
                         $replace = $row['replace'];
                     } else {
                         //Remove any array rows
-                        foreach ($row as $index => $check) {
-                            if (is_array($check)) {
-                                unset($row[$index]);
-                            }
-                        }
-                        $replace = $row;
+                        $replace = $this->remove_array_rows($row);
                     }
-                    foreach ($replace as $key => $val) {
-                        $sql .= '`' . $key . '` = \'' . $val . '\'';
-                        ($count == count($replace) - 1 ? $sql .= ';' : $sql .= ' AND ');
-                        $count++;
-                    }
+                    $sql = $this->build_delete_sql($table, $replace, $count);
                     //Delete row
                     //Prepare statement
                     if ($query = $con->prepare($sql)) {
@@ -174,6 +164,23 @@ class Run {
             $count++;
         }
         return $sql . $end_sql;
+    }
+
+    /**
+     * @param $table
+     * @param $replace
+     * @param $count
+     *
+     * @return string
+     */
+    public function build_delete_sql($table, $replace, $count) {
+        $sql = 'DELETE FROM ' . $table . ' WHERE ';
+        foreach ($replace as $key => $val) {
+            $sql .= '`' . $key . '` = \'' . $val . '\'';
+            ($count == count($replace) - 1 ? $sql .= ';' : $sql .= ' AND ');
+            $count++;
+        }
+        return $sql;
     }
 }
 
