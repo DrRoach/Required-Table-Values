@@ -13,14 +13,15 @@ Version 1.0 Usage
 
 Running The Code
 ----------------
-The code for this project is easy to run, simply `include` the file in your project and then create a new object of it passing in your database settings in a key value array matching the one below.
+The code for this project is easy to run, simply `include` the file in your project and then create a new object of it passing in your database settings in a key value array matching the one below. The `port` setting is completely optional and uses port 3306 as a default.
 ```php
 require('required-table-values/Run.php');
 $settings = array(
     'database_host' => 'localhost',
     'username' => 'root',
     'password' => '',
-    'database' => 'example'
+    'database' => 'example',
+    'port' => '3306'
 );
 new Run($settings);
 ```
