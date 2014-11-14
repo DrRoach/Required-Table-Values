@@ -101,10 +101,10 @@ class Run {
     /**
      * @param $settings
      * @param $json
-     * @param $table
-     * @param $con
+     * @param string $table
+     * @param mysqli $con
      *
-     * @return boolean
+     * @return null|boolean
      */
     public function settings($settings, $json, $table, $con) {
         foreach ($settings as $setting => $value) {
@@ -147,9 +147,9 @@ class Run {
 
     /**
      * @param $row
-     * @param $table
+     * @param string $table
      *
-     * @return array
+     * @return string
      */
     public function build_insert_sql($row, $table) {
         $sql = 'INSERT INTO ' . $table . ' (';
@@ -167,7 +167,7 @@ class Run {
     }
 
     /**
-     * @param $table
+     * @param string $table
      * @param $replace
      * @param $count
      *
