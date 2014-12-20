@@ -52,7 +52,7 @@ Example
         {
             "id": "1",
             "name": "Created By",
-            "value": "Ryan Deas"
+            "value": "Ryan Deas",
             "replace": {
                 "name": "Ryan Daes"
             }
@@ -68,8 +68,9 @@ Example
             "value": "17/11/2014",
             "replace": {
                 "name": "Estimated Next Update",
-                "value": NULL
+                "value": null
             }
+        }
     ],
     "settings": {
         "overwrite": true
